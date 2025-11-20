@@ -399,12 +399,15 @@ class DotCalendar:
         # Check for future precipitation
         unsunny_tip = ''
         week = datetime.now().weekday()
+        # Adjust week_label to match PHP's date('w') indexing (0=Sunday, 1=Monday, ...)
         week_label = ['周日', '周一', '周二', '周三', '周四', '周五', '周六']
+        # Convert Python weekday to PHP format for correct indexing
+        php_week = (week + 1) % 7  # Python: 0=Monday -> PHP: 1=Monday
         day_label = []
         is_next_week = False
         
         for i in range(14):  # Check next 14 days
-            if (week + i) % 7 == 0:  # Sunday is 0 in Python, but 1 in PHP
+            if (php_week + i) % 7 == 1:  # Monday is 1 in PHP date('w') format
                 if not is_next_week:
                     is_next_week = True
                 else:
@@ -418,7 +421,7 @@ class DotCalendar:
                 day_label.append('后天')
             else:
                 prefix = '下' if is_next_week else ''
-                day_label.append(prefix + week_label[(week + i) % 7])
+                day_label.append(prefix + week_label[(php_week + i) % 7])
         
         # Check forecasts
         for index, forecast in enumerate(self.data['daily']):
