@@ -1,6 +1,6 @@
 # Python Version of Dot Calendar
 
-This is a Python implementation of the Dot Calendar application, which generates weather calendar images for the Dot/Quote device.
+This is a Python implementation of the [Dot Calendar](https://github.com/wanyaxing/dot_calendar) application, which generates weather calendar images for the Dot/Quote device.
 
 ## Features
 
