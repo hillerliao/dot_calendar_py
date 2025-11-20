@@ -3,6 +3,9 @@
 # 脚本用于运行定时任务
 # 步骤包括进入项目目录，激活pipenv环境，运行python脚本
 
+# 确保 ~/.local/bin 在 PATH 中
+export PATH="$HOME/.local/bin:$PATH"
+
 # 进入项目主目录
 cd "$(dirname "$0")"
 
