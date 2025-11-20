@@ -1,20 +1,17 @@
 #!/bin/bash
 
-# 脚本用于运行定时任务
-# 步骤包括进入项目目录，激活pipenv环境，运行python脚本
-
-# 确保 ~/.local/bin 在 PATH 中
-export PATH="$HOME/.local/bin:$PATH"
-
 # 进入项目主目录
 cd "$(dirname "$0")"
 
-# 检查pipenv是否安装
-if ! command -v pipenv &> /dev/null
-then
+# 检查pipenv是否安装 (using full path)
+if [ ! -x "$HOME/.local/bin/pipenv" ]; then
     echo "pipenv 未安装，请先安装 pipenv"
+    echo "Expected location: $HOME/.local/bin/pipenv"
     exit 1
 fi
+
+# Use the full path for pipenv
+PIPENV_CMD="$HOME/.local/bin/pipenv"
 
 # 从.env文件读取token
 if [ -f ".env" ]; then
@@ -31,4 +28,4 @@ if [ -z "$DOT_CALENDAR_TOKEN" ]; then
 fi
 
 # 通过pipenv运行Python脚本
-pipenv run python main.py --token $DOT_CALENDAR_TOKEN --dotsync 1
+$PIPENV_CMD run python main.py --token $DOT_CALENDAR_TOKEN --dotsync 1
