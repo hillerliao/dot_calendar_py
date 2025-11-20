@@ -12,6 +12,21 @@ import config
 from dot_calendar import DotCalendar
 from dingtalk_caldav_client import DingtalkCalDAVClient
 
+# Try to import optional calendar clients
+try:
+    from icloud_caldav_client import ICloudCalDAVClient
+    ICLOUD_AVAILABLE = True
+except ImportError:
+    ICloudCalDAVClient = None
+    ICLOUD_AVAILABLE = False
+
+try:
+    from google_caldav_client import GoogleCalDAVClient
+    GOOGLE_AVAILABLE = True
+except ImportError:
+    GoogleCalDAVClient = None
+    GOOGLE_AVAILABLE = False
+
 
 def get_todolist_from_calendar_param(calendar_param: str) -> List[str]:
     """Get todo list from calendar parameter"""
@@ -74,6 +89,109 @@ def get_todolist_from_dingtalk() -> List[str]:
         return []
 
 
+def get_todolist_from_icloud() -> List[str]:
+    """Get todo list from iCloud calendar"""
+    if not ICLOUD_AVAILABLE:
+        print("iCloud CalDAV client not available. Please install required dependencies.")
+        return []
+        
+    if not config.ICLOUD_CALDAV_URL or not config.ICLOUD_CALDAV_USER or not config.ICLOUD_CALDAV_PASS:
+        return []
+        
+    try:
+        client = ICloudCalDAVClient(config.ICLOUD_CALDAV_USER, config.ICLOUD_CALDAV_PASS, config.ICLOUD_CALDAV_URL)
+        events = client.get_all_events(
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            datetime.now().strftime('%Y-%m-%d 00:00:00')
+        )
+        
+        todolist = []
+        index_day = datetime.now().day
+        
+        for event in events:
+            if 'SUMMARY' in event and 'DTSTART' in event:
+                # Handle different time formats
+                if isinstance(event['DTSTART'], int):
+                    event_date = datetime.fromtimestamp(event['DTSTART'])
+                else:
+                    # Try to parse as string date
+                    try:
+                        event_date = datetime.strptime(event['DTSTART'], '%Y%m%dT%H%M%S')
+                    except ValueError:
+                        event_date = datetime.now()
+                        
+                if event_date.day != index_day:
+                    todolist.append("")
+                    index_day = event_date.day
+                    
+                todolist.append(f"{event_date.strftime('%H:%M')} {event['SUMMARY']}")
+                
+        client.close()
+        return todolist
+    except Exception as e:
+        print(f"Error fetching iCloud calendar events: {e}")
+        return []
+
+
+def get_todolist_from_google() -> List[str]:
+    """Get todo list from Google calendar"""
+    if not GOOGLE_AVAILABLE:
+        print("Google CalDAV client not available. Please install required dependencies.")
+        return []
+        
+    if not config.GOOGLE_CALDAV_URL or not config.GOOGLE_CALDAV_USER or not config.GOOGLE_CALDAV_PASS:
+        return []
+        
+    try:
+        client = GoogleCalDAVClient(config.GOOGLE_CALDAV_USER, config.GOOGLE_CALDAV_PASS, config.GOOGLE_CALDAV_URL)
+        events = client.get_all_events(
+            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            datetime.now().strftime('%Y-%m-%d 00:00:00')
+        )
+        
+        todolist = []
+        index_day = datetime.now().day
+        
+        for event in events:
+            if 'SUMMARY' in event and 'DTSTART' in event:
+                # Handle different time formats
+                if isinstance(event['DTSTART'], int):
+                    event_date = datetime.fromtimestamp(event['DTSTART'])
+                else:
+                    # Try to parse as string date
+                    try:
+                        event_date = datetime.strptime(event['DTSTART'], '%Y%m%dT%H%M%S')
+                    except ValueError:
+                        event_date = datetime.now()
+                        
+                if event_date.day != index_day:
+                    todolist.append("")
+                    index_day = event_date.day
+                    
+                todolist.append(f"{event_date.strftime('%H:%M')} {event['SUMMARY']}")
+                
+        client.close()
+        return todolist
+    except Exception as e:
+        print(f"Error fetching Google calendar events: {e}")
+        return []
+
+
+def get_todolist_from_calendar() -> List[str]:
+    """Get todo list from configured calendar source"""
+    calendar_source = config.CALENDAR_SOURCE.lower()
+    
+    if calendar_source == 'dingtalk':
+        return get_todolist_from_dingtalk()
+    elif calendar_source == 'icloud':
+        return get_todolist_from_icloud()
+    elif calendar_source == 'google':
+        return get_todolist_from_google()
+    else:
+        # Default to dingtalk for backward compatibility
+        return get_todolist_from_dingtalk()
+
+
 def main():
     """Main function"""
     # Parse query parameters (in a real web app, this would come from the request)
@@ -94,8 +212,8 @@ def main():
     todolist = []
     if args.calendar:
         todolist = get_todolist_from_calendar_param(args.calendar)
-    elif config.DINGTALK_CALDAV_USER and config.DINGTALK_CALDAV_PASS:
-        todolist = get_todolist_from_dingtalk()
+    else:
+        todolist = get_todolist_from_calendar()
     
     # Create calendar
     dot_calendar = DotCalendar(
