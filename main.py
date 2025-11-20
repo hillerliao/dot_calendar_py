@@ -66,10 +66,12 @@ def get_todolist_from_dingtalk() -> List[str]:
         
     try:
         client = DingtalkCalDAVClient(config.DINGTALK_CALDAV_USER, config.DINGTALK_CALDAV_PASS)
-        events = client.get_all_events(
-            datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-            datetime.now().strftime('%Y-%m-%d 00:00:00')
-        )
+        # Match PHP version time range: -2 hours to +2 days
+        from datetime import timedelta
+        start_time = (datetime.now() - timedelta(hours=2)).strftime('%Y-%m-%d %H:%M:%S')
+        end_time = (datetime.now() + timedelta(days=2)).strftime('%Y-%m-%d %H:%M:%S')
+        
+        events = client.get_all_events(start_time, end_time)
         
         todolist = []
         index_day = datetime.now().day
@@ -85,7 +87,8 @@ def get_todolist_from_dingtalk() -> List[str]:
                 
         client.close()
         return todolist
-    except Exception:
+    except Exception as e:
+        print(f"Error getting DingTalk events: {e}")
         return []
 
 
@@ -214,6 +217,8 @@ def main():
         todolist = get_todolist_from_calendar_param(args.calendar)
     else:
         todolist = get_todolist_from_calendar()
+    
+
     
     # Create calendar
     dot_calendar = DotCalendar(

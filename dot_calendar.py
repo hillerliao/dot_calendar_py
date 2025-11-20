@@ -27,7 +27,7 @@ class DotCalendar:
     DAY_FONT_SIZE = 9
     DAY_ICON_MARGIN = 2
     ICON_FONT_SIZE = 10
-    TODO_FONT_SIZE = 9
+    TODO_FONT_SIZE = 10  # Increased from 9 to 10 for better readability
     TODO_MAX_LINE = 5
 
     def __init__(self, dot_device_id: str = '', dot_appkey: str = '', location: str = '',
@@ -293,6 +293,8 @@ class DotCalendar:
             font = ImageFont.load_default()
 
         process_height = 3
+        line_spacing = 3  # Increased from 2 to 3 for better line separation
+        char_spacing = 1  # Add character spacing
 
         if not self.todolist:
             try:
@@ -318,16 +320,22 @@ class DotCalendar:
                 # Create a separate image for the text line like PHP version does
                 # This is a simplified approach to match the PHP version's textToImage function
                 try:
-                    text_bbox = draw.textbbox((0, 0), line_text, font=font)
-                    text_width = text_bbox[2] - text_bbox[0]
-                    text_height = text_bbox[3] - text_bbox[1]
-                    
-                    # Position text at (3, process_height) to match PHP version
-                    draw.text((3, process_height), line_text, fill=(0, 0, 0), font=font)
+                    # Draw text with character spacing
+                    x_position = 3
+                    for char in line_text:
+                        draw.text((x_position, process_height), char, fill=(0, 0, 0), font=font)
+                        # Calculate character width and add spacing
+                        char_bbox = draw.textbbox((0, 0), char, font=font)
+                        char_width = char_bbox[2] - char_bbox[0]
+                        x_position += char_width + char_spacing
                 except UnicodeEncodeError:
                     # Skip drawing if Unicode is not supported
                     pass
-                process_height += text_height
+                # Calculate text height for line spacing
+                text_bbox = draw.textbbox((0, 0), line_text, font=font)
+                text_height = text_bbox[3] - text_bbox[1]
+                # Increase line spacing - add both text height and additional spacing
+                process_height += text_height + line_spacing
 
         return process_height
 

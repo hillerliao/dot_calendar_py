@@ -130,6 +130,7 @@ class DingtalkCalDAVClient:
                 data=calendar_query_xml.encode('utf-8'),
                 headers={
                     'Content-Type': 'application/xml; charset=utf-8',
+                    'Depth': '1'  # Add Depth header like PHP version
                 },
                 timeout=30
             )
@@ -178,23 +179,21 @@ class DingtalkCalDAVClient:
                 if event:
                     events.append(event)
             elif in_event:
-                # Handle continuation lines and key-value pairs
+                # Handle continuation lines and key-value pairs (matching PHP logic)
                 if ':' in line and not line.startswith(' '):
                     key, value = line.split(':', 1)
                     # Handle parameters in key
                     if ';' in key:
-                        main_key = key.split(';')[0]
-                        # Extract timezone if present
                         if 'TZID=' in key:
-                            tzid_match = re.search(r'TZID=([^;]+)', key)
-                            if tzid_match:
-                                tzid = tzid_match.group(1)
-                                try:
-                                    # Try to parse as timestamp with timezone
-                                    value = int(datetime.strptime(value, "%Y%m%dT%H%M%S").timestamp())
-                                except ValueError:
-                                    pass
-                        key = main_key
+                            # For now, keep the time value as is - this will be processed later
+                            # PHP version converts this using strtotime($value . ' ' . $parms['TZID'])
+                            # For simplicity, we'll convert to basic timestamp
+                            try:
+                                value = int(datetime.strptime(value, "%Y%m%dT%H%M%S").timestamp())
+                            except ValueError:
+                                # If parsing fails, keep original value
+                                pass
+                        key = key.split(';')[0]
                     event[key] = value
                 elif line.startswith(' ') and key:
                     # Continuation line
@@ -203,28 +202,29 @@ class DingtalkCalDAVClient:
         return events
     
     def get_all_events(self, start: Optional[str] = None, end: Optional[str] = None) -> List[Dict[str, Any]]:
-        """Get all events from all calendars"""
-        # Process time format
-        start_time = datetime.now()
-        end_time = datetime.now()
+        """Get all events from all calendars (matching PHP version logic)"""
+        from datetime import timedelta
         
-        if start:
-            start_time = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
-        if end:
-            end_time = datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
-        else:
-            end_time = start_time.replace(day=start_time.day + 7)  # Default 7 days
-        
-        # Convert to UTC format for CalDAV
-        start_utc = start_time.strftime('%Y%m%dT%H%M%SZ')
-        end_utc = end_time.strftime('%Y%m%dT%H%M%SZ')
-        
+        # Get all events without time filter first
         events = []
         for calendar in self.calendar_paths:
-            calendar_events = self.get_events(calendar['href'], start_utc, end_utc)
+            calendar_events = self.get_events(calendar['href'])  # No time filter
             events.extend(calendar_events)
         
-        # Sort events by start time
+        # If time range is specified, filter events client-side
+        if start and end:
+            start_dt = datetime.strptime(start, '%Y-%m-%d %H:%M:%S')
+            end_dt = datetime.strptime(end, '%Y-%m-%d %H:%M:%S')
+            
+            filtered_events = []
+            for event in events:
+                if 'DTSTART' in event and isinstance(event['DTSTART'], int):
+                    event_time = datetime.fromtimestamp(event['DTSTART'])
+                    if start_dt <= event_time <= end_dt:
+                        filtered_events.append(event)
+            events = filtered_events
+        
+        # Sort events by start time (matching PHP version)
         events.sort(key=lambda x: x.get('DTSTART', 0))
         return events
     
