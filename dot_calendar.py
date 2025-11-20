@@ -21,13 +21,13 @@ class DotCalendar:
     CALENDAR_START_LEFT = 2
     CALENDAR_START_TOP = -3
     GRID_WIDTH = 18
-    GRID_HEIGHT = 27
+    GRID_HEIGHT = 25.5  # Reduced from 27 to 24 to allow more compact layout
     HEADER_HEIGHT = 17
     HEADER_FONT_SIZE = 9
     DAY_FONT_SIZE = 9
     DAY_ICON_MARGIN = 2
     ICON_FONT_SIZE = 10
-    TODO_FONT_SIZE = 10  # Increased from 9 to 10 for better readability
+    TODO_FONT_SIZE = 10
     TODO_MAX_LINE = 5
 
     def __init__(self, dot_device_id: str = '', dot_appkey: str = '', location: str = '',
@@ -177,7 +177,7 @@ class DotCalendar:
                 param.font_icon = self.get_weather_font(forecast['iconNight'])
 
             param.dx = (param.week - 1) * self.GRID_WIDTH + 1
-            param.dy = (param.line + 1) * self.GRID_HEIGHT
+            param.dy = (param.line + 1) * self.GRID_HEIGHT - 3  # Reduced vertical spacing
 
             self.params.append(param)
 
@@ -196,7 +196,7 @@ class DotCalendar:
                         line=line,
                         font_icon=self.get_weather_font('999'),
                         dx=(i - 1) * self.GRID_WIDTH + 1,
-                        dy=(line + 1) * self.GRID_HEIGHT
+                        dy=(line + 1) * self.GRID_HEIGHT - 3  # Reduced vertical spacing
                     )
                     self.params.append(param)
 
@@ -454,7 +454,7 @@ class DotCalendar:
             try:
                 icon_font = ImageFont.truetype(self.icon_font, 35)
                 # Make sure the icon is within bounds (35 is the font size)
-                y_position = self.BG_HEIGHT - 35 - 5  # Leave margin at bottom
+                y_position = self.BG_HEIGHT - 35 - 2  # Reduced margin from 5 to 2
                 draw.text((3, y_position), icon_today, fill=(0, 0, 0), font=icon_font)
             except:
                 pass  # Font loading failed
@@ -469,7 +469,7 @@ class DotCalendar:
             temp_height = 20  # Approximate height of text with font size 20
             
             # Ensure we have enough space at the bottom with proper margin
-            margin = 5  # Add margin at the bottom
+            margin = 2  # Reduced margin from 5 to 2
             base_y = self.BG_HEIGHT - max(text_height, temp_height) - margin
             
             # Min temperature label
