@@ -29,3 +29,11 @@ GOOGLE_CALDAV_PASS = os.getenv('GOOGLE_CALDAV_PASS')
 
 # Cache path
 CACHE_PATH = os.path.join(os.path.dirname(__file__), '..', 'cache')
+
+
+# Ensure cache directory exists (useful in containers)
+try:
+	os.makedirs(CACHE_PATH, exist_ok=True)
+except Exception:
+	# Best-effort: if creation fails, code using CACHE_PATH should handle it
+	pass

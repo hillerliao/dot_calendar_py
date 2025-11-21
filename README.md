@@ -27,6 +27,37 @@ This is a Python implementation of the [Dot Calendar](https://github.com/wanyaxi
    # Edit ../.env with your configuration
    ```
 
+**Environment Variables & Docker**
+
+- **Prefer environment variables**: `config.py` reads configuration from environment variables (and will also load a local `.env` file if present). When running in Docker, pass secrets via environment variables rather than committing them to the image.
+- **Example: run with Docker and environment variables**
+
+   ```bash
+   docker build -t dot-calendar .
+   docker run -p 8000:8000 \
+      -e DOT_CALENDAR_TOKEN=your_token_here \
+      -e QWEATHER_KEY=your_qweather_key \
+      -e CONFIG_USER_LOCATION=116.41,39.90 \
+      --rm dot-calendar
+   ```
+
+- **Example: `docker run` with one-off generate call** (call the HTTP API from host):
+
+   ```bash
+   curl -X POST -H "Content-Type: application/json" \
+      -d '{"token":"your_token_here"}' \
+      http://localhost:8000/generate --output output.png
+   ```
+
+- **Example: enable `dotsync` to push image to Dot device** (requires `DOT_DEVICE_ID` and `DOT_APP_KEY` set in env):
+
+   ```bash
+   curl -X POST -H "Content-Type: application/json" \
+      -d '{"token":"your_token_here","dotsync":true}' \
+      http://localhost:8000/generate --output output.png
+   ```
+
+- **Docker Compose**: you can also set environment variables in `docker-compose.yml`, or mount a `.env` file.
 ## Usage
 
 Run the main script with appropriate parameters:
