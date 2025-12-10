@@ -40,7 +40,7 @@ class DotCalendar:
         self.todolist = todolist or []
 
         # Font paths
-        self.fonts_dir = os.path.join(os.path.dirname(__file__), 'fonts')
+        self.fonts_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'assets', 'fonts')
         self.text_font = os.path.join(self.fonts_dir, 'fusion-pixel-12px-monospaced-zh_hans.ttf')
         self.number_font = os.path.join(self.fonts_dir, 'fusion-pixel-12px-monospaced-zh_hans.ttf')
         self.icon_font = os.path.join(self.fonts_dir, 'qweather-icons.ttf')
@@ -502,6 +502,7 @@ class DotCalendar:
         bw_image = self.blackwhite_image(self.image)
         
         if dotsync and self.dot_device_id and self.dot_appkey:
+            print(f"📱 Connecting to Dot device service...")
             # Save image to bytes
             img_buffer = BytesIO()
             bw_image.save(img_buffer, format='PNG')
@@ -509,11 +510,13 @@ class DotCalendar:
             image_content = img_buffer.getvalue()
             
             # Send to Dot devices
-            for device_id in self.dot_device_id.split(','):
+            devices = [d.strip() for d in self.dot_device_id.split(',')]
+            for device_id in devices:
                 try:
+                    print(f"   Shape sending to {device_id}...")
                     url = 'https://dot.mindreset.tech/api/open/image'
                     payload = {
-                        "deviceId": device_id.strip(),
+                        "deviceId": device_id,
                         "image": base64.b64encode(image_content).decode('utf-8'),
                         "refreshNow": True,
                         "border": 0,
@@ -527,10 +530,14 @@ class DotCalendar:
                     }
                     
                     response = requests.post(url, json=payload, headers=headers, timeout=30)
-                    # Could add logging here if needed
+                    if response.status_code == 200:
+                        print(f"   ✅ Push success: {device_id}")
+                    else:
+                        print(f"   ❌ Push failed: {device_id} (Status: {response.status_code})")
+                        print(f"      Response: {response.text}")
                     
-                except requests.RequestException:
-                    # Silent fail like in PHP version
+                except requests.RequestException as e:
+                    print(f"   ❌ Network error: {device_id} - {str(e)}")
                     pass
                     
         else:

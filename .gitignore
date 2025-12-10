@@ -1,4 +1,34 @@
+# Environment variables
 .env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Cache directory for API responses
+cache/
+
+# Logs
+*.log
+weather_scheduler.log
+
+# Generated output images
+assets/output/*
+!assets/output/.gitkeep
+*.png
+
+# Temporary/Test files
 test_*
 output*
 *debug*
+temp_*
+*_test.py
+
+# System files
+.DS_Store
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/

@@ -6,6 +6,7 @@ import io
 import config
 import main as main_mod
 from dot_calendar import DotCalendar
+from weather_chart import WeatherChart
 
 app = FastAPI(title="Dot Calendar API")
 
@@ -62,3 +63,40 @@ async def generate(payload: dict):
             pass
 
     return Response(content=buf.getvalue(), media_type='image/png')
+
+
+@app.post("/weather-chart")
+async def weather_chart(payload: dict):
+    """生成天气预报走势图"""
+    token = payload.get('token')
+    if not token or token != config.DOT_CALENDAR_TOKEN:
+        raise HTTPException(status_code=403, detail='Forbidden')
+
+    days = payload.get('days', 15)  # 默认15天
+    include_yesterday = payload.get('include_yesterday', True)  # 默认包含昨天数据
+    
+    try:
+        chart = WeatherChart(
+            location=config.CONFIG_USER_LOCATION,
+            qweather_host=config.QWEATHER_HOST,
+            qweather_key=config.QWEATHER_KEY
+        )
+        
+        # 加载天气数据
+        chart.load_weather_data(days=days, include_yesterday=include_yesterday)
+        
+        # 创建图像
+        chart.create_image()
+        
+        # 转换为黑白图像 (适配墨水屏)
+        bw_image = chart.blackwhite_image()
+        
+        # 获取图像字节流
+        buf = io.BytesIO()
+        bw_image.save(buf, format='PNG')
+        buf.seek(0)
+        
+        return Response(content=buf.getvalue(), media_type='image/png')
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f'生成天气预报走势图失败: {str(e)}')

@@ -2,7 +2,7 @@ import os
 from dotenv import load_dotenv
 
 # Load environment variables from .env file
-load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
 
 # Configuration constants
 DOT_CALENDAR_TOKEN = os.getenv('DOT_CALENDAR_TOKEN')
@@ -28,7 +28,7 @@ GOOGLE_CALDAV_USER = os.getenv('GOOGLE_CALDAV_USER')
 GOOGLE_CALDAV_PASS = os.getenv('GOOGLE_CALDAV_PASS')
 
 # Cache path
-CACHE_PATH = os.path.join(os.path.dirname(__file__), '..', 'cache')
+CACHE_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'cache')
 
 
 # Ensure cache directory exists (useful in containers)

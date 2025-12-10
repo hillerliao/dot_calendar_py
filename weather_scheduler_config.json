@@ -1,0 +1,28 @@
+{
+  "enabled": true,
+  "forecast_days": 7,
+  "include_yesterday": true,
+  "output_filename": "weather_chart_{date}.png",
+  "output_dir": "./output",
+  "device_push": {
+    "enabled": true,
+    "device_idx": 0
+  },
+  "cleanup": {
+    "enabled": true,
+    "keep_files": 5
+  },
+  "notification": {
+    "enabled": false,
+    "webhook_url": "https://hooks.slack.com/services/YOUR/SLACK/WEBHOOK",
+    "success_message": "天气预报走势图生成并推送成功",
+    "error_message": "天气预报走势图生成失败，请检查日志"
+  },
+  "schedule": {
+    "times": [
+      "08:00",
+      "20:00"
+    ],
+    "timezone": "Asia/Shanghai"
+  }
+}

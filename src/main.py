@@ -10,18 +10,18 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import config
 from dot_calendar import DotCalendar
-from dingtalk_caldav_client import DingtalkCalDAVClient
+from clients.dingtalk_caldav_client import DingtalkCalDAVClient
 
 # Try to import optional calendar clients
 try:
-    from icloud_caldav_client import ICloudCalDAVClient
+    from clients.icloud_caldav_client import ICloudCalDAVClient
     ICLOUD_AVAILABLE = True
 except ImportError:
     ICloudCalDAVClient = None
     ICLOUD_AVAILABLE = False
 
 try:
-    from google_caldav_client import GoogleCalDAVClient
+    from clients.google_caldav_client import GoogleCalDAVClient
     GOOGLE_AVAILABLE = True
 except ImportError:
     GoogleCalDAVClient = None
