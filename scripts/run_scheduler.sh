@@ -36,16 +36,5 @@ if [ -z "$DOT_CALENDAR_TOKEN" ]; then
     exit 1
 fi
 
-# 获取推送配置，默认为 true
-ENABLE_PUSH=${CALENDAR_ENABLE_DEVICE_PUSH:-"true"}
-DOTSYNC_FLAG=0
-
-if [ "$ENABLE_PUSH" = "true" ]; then
-    DOTSYNC_FLAG=1
-    echo "📱 日历推送已启用"
-else
-    echo "ℹ️  日历推送已禁用，仅生成本地文件"
-fi
-
 # 通过pipenv运行Python脚本
-$PIPENV_CMD run python src/main.py --token $DOT_CALENDAR_TOKEN --dotsync $DOTSYNC_FLAG
+$PIPENV_CMD run python src/main.py --token $DOT_CALENDAR_TOKEN --dotsync 1
