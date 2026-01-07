@@ -526,7 +526,8 @@ class DotCalendar:
                     
                     headers = {
                         'Authorization': f'Bearer {self.dot_appkey}',
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept-Encoding': 'identity'  # 禁用gzip压缩
                     }
                     
                     response = requests.post(url, json=payload, headers=headers, timeout=30)

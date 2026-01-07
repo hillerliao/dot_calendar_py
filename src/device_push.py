@@ -106,7 +106,8 @@ def push_image_to_device(image_path: str, device_id: str = None, app_key: str = 
                 
                 headers = {
                     'Authorization': f'Bearer {app_key}',
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Accept-Encoding': 'identity'  # 禁用gzip压缩
                 }
                 
                 response = requests.post(url, json=payload, headers=headers, timeout=30)
